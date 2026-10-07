@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusCompass GECP — Timetable Portal & 3D Campus GPS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#176b45">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="icon-192.png" alt="TimeTable Logo" class="brand-logo-img" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,0.25);margin-right:10px;border:2px solid #38bdf8">
+    <div><h1>CampusCompass GECP</h1><p>Government Engineering College, Palanpur • Smart Timetable & 3D GPS (2026–27)</p></div>
+  </div>
+  <div class="nav">
+    <button id="btnGlobalBack" class="btn-nav-back" style="display:none" onclick="goBack()" title="Go to previous page">⬅️ Back</button>
+    <button onclick="showPage('home')">🏠 Home</button>
+    <button onclick="showPage('login')">🎓 Student Portal</button>
+    <button onclick="showPage('faculty')">👨‍🏫 Faculty Portal</button>
+    <button onclick="showPage('admin')">🛡️ Admin Portal</button>
+    <button onclick="showPage('timetable')">📅 Timetables</button>
+    <button onclick="showPage('navigation'); focusRoomSearch();">🔍 Room GPS & Search</button>
+    <button class="btn-phone-app" style="background:#0f5132;color:#ffffff;font-weight:700" onclick="openPhoneInstallModal()">📱 Phone App</button>
+    <button class="btn-share-app" onclick="openShareModal()">📲 Download App</button>
+  </div>
+</header>
+
+<main>
+<!-- ============================================== -->
+<!-- PORTAL HOME GATEWAY (3 PROMINENT BUTTONS) -->
+<!-- ============================================== -->
+<section id="home" class="page">
+  <!-- Mobile Phone App 1-Click Install Banner -->
+  <div class="mobile-app-banner">
+    <div class="banner-content">
+      <div class="banner-icon">📱</div>
+      <div>
+        <h4>📲 Install CampusCompass on Mobile Phone</h4>
+        <p>Android & iPhone: Instant 1-tap installation! Access your personal timetable, study notes, assignments & 3D room GPS offline on your mobile home screen.</p>
+      </div>
+    </div>
+    <button class="banner-btn" onclick="openPhoneInstallModal()">📲 Install on Phone</button>
+  </div>
+
+  <div class="hero">
+    <h2>🧭 CampusCompass GECP — Academic Portal & Campus GPS Navigator</h2>
+    <p>Government Engineering College, Palanpur. Select your role below to access your personalized timetable, classroom wayfinding, and administrative tools.</p>
+  </div>
+
+  <!-- Google Maps Style Quick Room Search Bar on Home Page -->
+  <div class="home-room-search-bar">
+    <span style="font-size:20px">🔍</span>
+    <input id="homeQuickSearch" placeholder="Search Room No. (e.g. 5104, 8006, 4010, 7109, 1001) or Building name..." oninput="handleHomeQuickSearch(this.value)" autocomplete="off">
+    <button class="btn" onclick="executeHomeQuickSearch()">Find & Navigate ➔</button>
+    <div id="homeQuickSuggestions" class="search-suggestions hidden"></div>
+  </div>
+
+  <!-- 3 Prominent Portal Cards -->
+  <div class="portal-grid">
+    <div class="portal-card" onclick="showPage('login'); loginMode('login')">
+      <div class="portal-icon">🎓</div>
+      <h3>Student login</h3>
+      <p>Sign in with your enrollment number or mobile to access personalized timetable, active class status, notes, and practical submissions.</p>
+      <button class="btn" style="width:100%" onclick="event.stopPropagation(); showPage('login'); loginMode('login')">Student Login →</button>
+    </div>
+
+    <div class="portal-card" onclick="showPage('faculty'); facultyLoginMode('login')">
+      <div class="portal-icon">👨‍🏫</div>
+      <h3>Faculty login</h3>
+      <p>Sign in with your faculty code (e.g. SDJ, RHJ, KMG) to view your teaching schedule, active sessions, and room locations.</p>
+      <button class="btn" style="width:100%" onclick="event.stopPropagation(); showPage('faculty'); facultyLoginMode('login')">Faculty Login →</button>
+    </div>
+
+    <div class="portal-card" onclick="showPage('admin')">
+      <div class="portal-icon">🛡️</div>
+      <h3>Admin login</h3>
+      <p>Department administrators: Manage class entries, edit student registrations, and inspect the full SQLite database.</p>
+      <button class="btn" style="width:100%" onclick="event.stopPropagation(); showPage('admin')">Admin Login →</button>
+    </div>
+  </div>
+
+  <!-- Prominent Sign Up Banner -->
+  <div class="portal-signup-banner">
+    <div>
+      <h4>✨ New to CampusCompass? Don't have an account yet?</h4>
+      <p>Create your student account in seconds or activate your faculty profile.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="openStudentSignup()">📝 New Student Sign Up</button>
+      <button class="btn secondary" onclick="openFacultySignup()">👨‍🏫 Faculty Sign Up</button>
+    </div>
+  </div>
+
+  <!-- Quick Explorer Buttons -->
+  <div style="display:flex;gap:12px;margin:22px 0 16px;flex-wrap:wrap">
+    <button class="btn secondary" onclick="showPage('timetable')">📅 View Public College Timetable</button>
+    <button class="btn secondary" onclick="showPage('navigation')">🧭 Campus GPS Navigator (Demo)</button>
+  </div>
+
+  <!-- Department Quick Cards -->
+  <div class="grid">
+    <div class="card" onclick="openDeptNav('Computer Engineering')" style="cursor:pointer"><h3>Computer Engineering</h3><span class="badge">CP1 • CP2 • CP3</span><p class="muted">Block 8000 (Sem I, III, V, VII)</p><small style="color:var(--green);font-weight:700">🧭 View 3D Floor Plan →</small></div>
+    <div class="card" onclick="openDeptNav('Electrical Engineering')" style="cursor:pointer"><h3>Electrical Engineering</h3><span class="badge">E1 • E2</span><p class="muted">Block 4000 (Sem I, III, V, VII)</p><small style="color:var(--green);font-weight:700">🧭 View 3D Floor Plan →</small></div>
+    <div class="card" onclick="openDeptNav('Civil Engineering')" style="cursor:pointer"><h3>Civil Engineering</h3><span class="badge">C1 • C2 • C3</span><p class="muted">Block 7000 (Sem I, III, V, VII)</p><small style="color:var(--green);font-weight:700">🧭 View 3D Floor Plan →</small></div>
+    <div class="card" onclick="openDeptNav('Mechanical Engineering')" style="cursor:pointer"><h3>Mechanical Engineering</h3><span class="badge">M1 • M2 • M3</span><p class="muted">Block 5000 (Sem I, III, V, VII)</p><small style="color:var(--green);font-weight:700">🧭 View 3D Floor Plan →</small></div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h3>How it works</h3>
+    <ol class="muted">
+      <li><b>Choose Your Role:</b> Select Student, Faculty, or Admin from the portal cards above.</li>
+      <li><b>Instant Timetable:</b> Automatically filtered to your branch, semester, and batch with live current/upcoming class indicators.</li>
+      <li><b>Campus GPS Navigator (Demo):</b> Select any classroom or lab to simulate start-to-destination route walking on 3D maps!</li>
+      <li><b>Admin Database Control:</b> Full SQLite database inspection and management is strictly reserved for Admin.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- CAMPUS GPS & GOOGLE MAPS NAVIGATION (8 BUILDINGS & ROOM FINDER) -->
+<!-- ============================================== -->
+<section id="navigation" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">🧭 Campus 3D GPS & Room Wayfinding</span>
+    <span></span>
+  </div>
+  <!-- Google Maps Style Quick Room Search & 8 Buildings Bar -->
+  <div class="panel map-search-panel" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2 style="margin:0;font-size:20px">📍 GEC Palanpur Campus GPS & Door-to-Door Wayfinding</h2>
+        <p class="muted small" style="margin:3px 0 0">Search any room number or building across the 8 campus blocks for turn-by-turn route guidance.</p>
+      </div>
+      <div class="actions" style="margin:0">
+        <button class="btn secondary" style="padding:6px 12px;font-size:12px" onclick="useLiveGeolocation()">📡 Detect GPS / Set Entry</button>
+      </div>
+    </div>
+
+    <!-- Search Input with Auto-Complete Suggestions -->
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="navRoomSearchInput" type="text" placeholder="Type Room No. (e.g. 5104, 8006, 4010, 7109, 1001) or Building Name..." autocomplete="off" oninput="handleNavSearchInput(this.value)">
+      <button id="btnClearSearch" class="btn-clear hidden" onclick="clearNavSearch()">✕</button>
+      <button class="btn" style="padding:8px 16px" onclick="executeRoomSearch()">Navigate ➔</button>
+      <div id="navSearchSuggestions" class="search-suggestions hidden"></div>
+    </div>
+
+    <!-- 8 Buildings Series Filter Bar -->
+    <div class="bldg-chip-bar">
+      <span class="chip-bar-label">Campus Buildings:</span>
+      <button class="bldg-chip active" id="bldgChip_all" onclick="filterByBuilding('ALL')">🏢 All 8 Buildings</button>
+      <button class="bldg-chip" id="bldgChip_1" onclick="filterByBuilding(1)">🏛️ 1: Admin Block</button>
+      <button class="bldg-chip" id="bldgChip_2" onclick="filterByBuilding(2)">📚 2: Library</button>
+      <button class="bldg-chip" id="bldgChip_3" onclick="filterByBuilding(3)">🍴 3: Canteen & Club</button>
+      <button class="bldg-chip" id="bldgChip_4" onclick="filterByBuilding(4)">⚡ 4: Electrical Engg</button>
+      <button class="bldg-chip" id="bldgChip_5" onclick="filterByBuilding(5)">⚙️ 5: Mechanical Engg</button>
+      <button class="bldg-chip" id="bldgChip_6" onclick="filterByBuilding(6)">🔧 6: Workshop (1 Floor)</button>
+      <button class="bldg-chip" id="bldgChip_7" onclick="filterByBuilding(7)">🏗️ 7: Civil Engg</button>
+      <button class="bldg-chip" id="bldgChip_8" onclick="filterByBuilding(8)">💻 8: Computer Engg</button>
+    </div>
+  </div>
+
+  <div class="nav-layout">
+    <!-- Directions Sidebar -->
+    <div class="directions-card">
+      <div class="direction-inputs">
+        <div class="route-input-group">
+          <span>🟢</span>
+          <select id="routeStart" onchange="calculateCampusRoute()">
+            <option value="gate">Main Campus Gate (SH-41 Highway Entry)</option>
+            <option value="live">📍 My Live GPS Location (Entry)</option>
+            <option value="admin">🏛️ Building 1: Administration Block</option>
+            <option value="library">📚 Building 2: Central Library</option>
+            <option value="canteen">🍴 Building 3: College Canteen & Club</option>
+            <option value="electrical">⚡ Building 4: Electrical Engg Block (4000)</option>
+            <option value="mechanical">⚙️ Building 5: Mechanical Engg Block (5000)</option>
+            <option value="workshop">🔧 Building 6: College Workshop</option>
+            <option value="civil">🏗️ Building 7: Civil Engg Block (7000)</option>
+            <option value="computer">💻 Building 8: Computer Engg Block (8000)</option>
+          </select>
+        </div>
+
+        <button class="btn-swap-route" title="Swap Start and Destination" onclick="swapRouteEndpoints()">⇅</button>
+
+        <div class="route-input-group">
+          <span>🔴</span>
+          <select id="routeDest" onchange="onDestinationDropdownChange()">
+            <optgroup label="🏛️ Building 1: Administration Block (Series 1000/1100)">
+              <option value="admin">🏛️ Building 1: Administration Department Main Entrance</option>
+              <option value="1001">Room 1001 — Principal Cabin & Office (Ground Floor)</option>
+              <option value="1002">Room 1002 — Student Section & Academic Admin (Ground Floor)</option>
+              <option value="1003">Room 1003 — Accounts & Cash Branch (Ground Floor)</option>
+              <option value="1004">Room 1004 — Administrative Establishment (Ground Floor)</option>
+              <option value="1101">Room 1101 — Examination Cell & Confidential Room (1st Floor)</option>
+              <option value="1102">Room 1102 — Conference & Board Meeting Room (1st Floor)</option>
+              <option value="1103">Room 1103 — Training & Placement Cell (1st Floor)</option>
+            </optgroup>
+            <optgroup label="📚 Building 2: Central Library (Series 2000/2100)">
+              <option value="library">📚 Building 2: Central Library Main Entrance</option>
+              <option value="2001">Room 2001 — Book Circulation & Issue Counter (Ground Floor)</option>
+              <option value="2002">Room 2002 — Digital Library & OPAC Lab (Ground Floor)</option>
+              <option value="2003">Room 2003 — Periodicals & Newspapers Section (Ground Floor)</option>
+              <option value="2101">Room 2101 — Central Reading Hall (1st Floor)</option>
+              <option value="2102">Room 2102 — Reference Book & Research Wing (1st Floor)</option>
+            </optgroup>
+            <optgroup label="🍴 Building 3: Canteen & Amenities (Series 3000/3100)">
+              <option value="canteen">🍴 Building 3: College Canteen & Dining Pavilion</option>
+              <option value="3001">Room 3001 — Student Canteen & Cafeteria (Ground Floor)</option>
+              <option value="3002">Room 3002 — Faculty Dining Lounge (Ground Floor)</option>
+              <option value="3101">Room 3101 — Music Club & Cultural Activity Room (1st Floor)</option>
+              <option value="3102">Room 3102 — Indoor Sports Room (TT, Chess, Carrom) (1st Floor)</option>
+              <option value="3103">Room 3103 — Student Council & Gymnasium (1st Floor)</option>
+            </optgroup>
+            <optgroup label="⚡ Building 4: Electrical Engineering (Series 4000/4100)">
+              <option value="electrical">⚡ Building 4: Electrical Engineering Department Entrance</option>
+              <option value="4001">Room 4001 — H.O.D. Cabin (Ground Floor)</option>
+              <option value="4002">Room 4002 — Maintenance Room (Ground Floor)</option>
+              <option value="4003">Room 4003 — Dept. Library (Ground Floor)</option>
+              <option value="4004">Room 4004 — Faculty Room (Ground Floor)</option>
+              <option value="4005">Room 4005 — Drawing Room (Ground Floor)</option>
+              <option value="4006">Room 4006 — Class Room (Ground Floor)</option>
+              <option value="4007">Room 4007 — Class Room (Ground Floor)</option>
+              <option value="4009">Room 4009 — High Voltage Lab & Switch Gear Lab (Ground Floor)</option>
+              <option value="4010">Room 4010 — Basic Electrical Lab & Workshop (Ground Floor)</option>
+              <option value="4011">Room 4011 — Electrical Machine Laboratory (Ground Floor)</option>
+              <option value="4012">Room 4012 — Seminar Hall (Ground Floor)</option>
+              <option value="4101">Room 4101 — Faculty Room (1st Floor)</option>
+              <option value="4102">Room 4102 — Store (1st Floor)</option>
+              <option value="4103">Room 4103 — Dept. Library / Office (1st Floor)</option>
+              <option value="4104">Room 4104 — Class Room (1st Floor)</option>
+              <option value="4105">Room 4105 — Tutorial Room (1st Floor)</option>
+              <option value="4106">Room 4106 — Class Room (1st Floor)</option>
+              <option value="4107">Room 4107 — Class Room (1st Floor)</option>
+              <option value="4108">Room 4108 — Tutorial Room (1st Floor)</option>
+              <option value="4109">Room 4109 — Class Room (1st Floor)</option>
+              <option value="4111">Room 4111 — Microprocessor & Project Lab (1st Floor)</option>
+              <option value="4112">Room 4112 — Network & Control Lab (1st Floor)</option>
+              <option value="4113">Room 4113 — Basic Electronics Lab (1st Floor)</option>
+              <option value="4114">Room 4114 — Computer Laboratory (1st Floor)</option>
+            </optgroup>
+            <optgroup label="⚙️ Building 5: Mechanical Engineering (Series 5000/5100)">
+              <option value="mechanical">⚙️ Building 5: Mechanical Engineering Department Entrance</option>
+              <option value="5001">Room 5001 — H.O.D. Cabin (Ground Floor)</option>
+              <option value="5002">Room 5002 — Store Room (Ground Floor)</option>
+              <option value="5003">Room 5003 — Green Room (Ground Floor)</option>
+              <option value="5004">Room 5004 — Faculty Room (Ground Floor)</option>
+              <option value="5005">Room 5005 — Tutorial Room (Ground Floor)</option>
+              <option value="5006">Room 5006 — Class Room (Ground Floor)</option>
+              <option value="5007">Room 5007 — Class Room (Ground Floor)</option>
+              <option value="5009">Room 5009 — Fluid Mechanics & Fluid Power Lab (Ground Floor)</option>
+              <option value="5010">Room 5010 — RAC & Heat Transfer Lab (Ground Floor)</option>
+              <option value="5011">Room 5011 — IC / Auto Laboratory (Ground Floor)</option>
+              <option value="5012">Room 5012 — Seminar Hall (Ground Floor)</option>
+              <option value="5101">Room 5101 — Faculty Room (1st Floor)</option>
+              <option value="5102">Room 5102 — Store / Class (1st Floor)</option>
+              <option value="5103">Room 5103 — Design Engineering Lab (1st Floor)</option>
+              <option value="5104">Room 5104 — Class Room (1st Floor)</option>
+              <option value="5105">Room 5105 — Tutorial Room (1st Floor)</option>
+              <option value="5106">Room 5106 — Class Room (1st Floor)</option>
+              <option value="5107">Room 5107 — Class Room (1st Floor)</option>
+              <option value="5108">Room 5108 — Tutorial Room (1st Floor)</option>
+              <option value="5109">Room 5109 — Class Room (1st Floor)</option>
+              <option value="5111">Room 5111 — Drawing Hall (1st Floor)</option>
+              <option value="5112">Room 5112 — Basic Mechanical Lab (1st Floor)</option>
+              <option value="5113">Room 5113 — Kinematics & Dynamics Lab (1st Floor)</option>
+              <option value="5114">Room 5114 — Computer Laboratory (1st Floor)</option>
+            </optgroup>
+            <optgroup label="🔧 Building 6: College Workshop (Series 6000 — Single Floor Only)">
+              <option value="workshop">🔧 Building 6: College Workshop Main Building</option>
+              <option value="6001">Room 6001 — Carpentry Shop (Ground Floor)</option>
+              <option value="6002">Room 6002 — Fitting Shop (Ground Floor)</option>
+              <option value="6003">Room 6003 — Welding Shop (Ground Floor)</option>
+              <option value="6004">Room 6004 — Machine Shop & Turning Section (Ground Floor)</option>
+              <option value="6005">Room 6005 — Smithy & Sheet Metal Shop (Ground Floor)</option>
+              <option value="6006">Room 6006 — Foundry & Casting Section (Ground Floor)</option>
+              <option value="6007">Room 6007 — Workshop Superintendent Office (Ground Floor)</option>
+            </optgroup>
+            <optgroup label="🏗️ Building 7: Civil Engineering (Series 7000/7100)">
+              <option value="civil">🏗️ Building 7: Civil Engineering Department Entrance</option>
+              <option value="7001">Room 7001 — H.O.D. Cabin (Ground Floor)</option>
+              <option value="7002">Room 7002 — Maintenance Store (Ground Floor)</option>
+              <option value="7003">Room 7003 — Dept. Office (Ground Floor)</option>
+              <option value="7004">Room 7004 — Faculty Room (Ground Floor)</option>
+              <option value="7005">Room 7005 — Tutorial Room (Ground Floor)</option>
+              <option value="7006">Room 7006 — Class Room (Ground Floor)</option>
+              <option value="7007">Room 7007 — Class Room (Ground Floor)</option>
+              <option value="7009">Room 7009 — Concrete Technology Lab (Ground Floor)</option>
+              <option value="7010">Room 7010 — Transportation & Soil Mechanics Lab (Ground Floor)</option>
+              <option value="7011">Room 7011 — Fluid Mechanics & Hydraulics Lab (Ground Floor)</option>
+              <option value="7012">Room 7012 — Seminar Hall (Ground Floor)</option>
+              <option value="7101">Room 7101 — Faculty Room (1st Floor)</option>
+              <option value="7102">Room 7102 — Store (1st Floor)</option>
+              <option value="7103">Room 7103 — Dept. Library (1st Floor)</option>
+              <option value="7104">Room 7104 — Class Room (1st Floor)</option>
+              <option value="7105">Room 7105 — Tutorial Room (1st Floor)</option>
+              <option value="7106">Room 7106 — Class Room (1st Floor)</option>
+              <option value="7107">Room 7107 — Class Room (1st Floor)</option>
+              <option value="7108">Room 7108 — Tutorial Room (1st Floor)</option>
+              <option value="7109">Room 7109 — Class Room (1st Floor)</option>
+              <option value="7111">Room 7111 — Drawing Hall (1st Floor)</option>
+              <option value="7112">Room 7112 — Mechanics Lab (1st Floor)</option>
+              <option value="7113">Room 7113 — Environmental Engineering Lab (1st Floor)</option>
+              <option value="7114">Room 7114 — Computer Laboratory (1st Floor)</option>
+            </optgroup>
+            <optgroup label="💻 Building 8: Computer Engineering (Series 8000/8100)">
+              <option value="computer">💻 Building 8: Computer Engineering Department Entrance</option>
+              <option value="8001">Room 8001 — H.O.D. Cabin (Ground Floor)</option>
+              <option value="8002">Room 8002 — Server Room (Ground Floor)</option>
+              <option value="8003">Room 8003 — Dept. Office (Ground Floor)</option>
+              <option value="8004">Room 8004 — Faculty Room (Ground Floor)</option>
+              <option value="8005">Room 8005 — Tutorial Room (Ground Floor)</option>
+              <option value="8006">Room 8006 — Class Room (Ground Floor)</option>
+              <option value="8007">Room 8007 — Class Room (Ground Floor)</option>
+              <option value="8009">Room 8009 — Chemistry Laboratory (Ground Floor)</option>
+              <option value="8010">Room 8010 — Mine Machinery Laboratory (Ground Floor)</option>
+              <option value="8011">Room 8011 — Physics Laboratory (Ground Floor)</option>
+              <option value="8012">Room 8012 — Seminar Hall (Ground Floor)</option>
+              <option value="8101">Room 8101 — Faculty Room (1st Floor)</option>
+              <option value="8102">Room 8102 — Store (1st Floor)</option>
+              <option value="8103">Room 8103 — Dept. Library (1st Floor)</option>
+              <option value="8104">Room 8104 — Class Room (1st Floor)</option>
+              <option value="8105">Room 8105 — Tutorial Room (1st Floor)</option>
+              <option value="8106">Room 8106 — Class Room (1st Floor)</option>
+              <option value="8107">Room 8107 — Class Room (1st Floor)</option>
+              <option value="8108">Room 8108 — Tutorial Room (1st Floor)</option>
+              <option value="8109">Room 8109 — Class Room (1st Floor)</option>
+              <option value="8111">Room 8111 — Geology Laboratory (1st Floor)</option>
+              <option value="8112">Room 8112 — Rock Mechanics Laboratory (1st Floor)</option>
+              <option value="8113">Room 8113 — Mine Environmental Laboratory (1st Floor)</option>
+              <option value="8114">Room 8114 — Language Laboratory / Advanced Computing (1st Floor)</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <div class="route-summary-pill">
+        <div class="route-stat"><span id="routeDistance">🚶 ~180 m</span></div>
+        <div class="route-stat"><span id="routeTime">⏱️ 2 mins</span></div>
+        <div class="route-stat"><span id="routeFloorBadge" class="badge">Campus Route</span></div>
+      </div>
+
+      <div class="actions" style="margin-top:0;margin-bottom:14px">
+        <button id="btnStartNav" class="btn" style="flex:1" onclick="toggleLiveNavigation()">▶️ Start Live Navigation</button>
+      </div>
+
+      <h4 style="margin:12px 0 8px">Turn-by-Turn Route Guidance:</h4>
+      <div id="routeStepsList" class="step-list"></div>
+    </div>
+
+    <!-- Map Viewport -->
+    <div class="map-viewport-container">
+      <div class="map-view-switcher">
+        <button id="btnViewSatellite" class="map-switch-btn active" onclick="setMapViewMode('satellite')">🗺️ 3D Campus Road Map (Outdoor)</button>
+        <button id="btnView3DFloor" class="map-switch-btn" onclick="setMapViewMode('floorplan')">📐 Indoor Floor Plan (Door-to-Door)</button>
+        <div class="floor-toggle-wrapper" id="floorToggleContainer">
+          <button id="btnFloor0" class="floor-btn active" onclick="setUserFloor(0)">🏢 Ground Floor (0)</button>
+          <button id="btnFloor1" class="floor-btn" onclick="setUserFloor(1)">🏢 First Floor (1)</button>
+        </div>
+      </div>
+
+      <div id="liveNavBanner" class="map-live-banner hidden">
+        <div class="live-dot"></div>
+        <span id="liveNavStatusText">Live Walking Demo Active</span>
+      </div>
+
+      <div class="map-canvas-wrapper" id="mapWrapper">
+        <img id="navMapImg" src="maps/gecp-aerial-3d.webp" alt="GEC Palanpur 3D Aerial Campus Map">
+        <!-- SVG overlay for dynamic line-by-line polyline paths and markers -->
+        <svg id="navSvgOverlay" class="map-overlay-layer" viewBox="0 0 682 1024" preserveAspectRatio="none">
+          <path id="routePolylineGlow" d="" fill="none" stroke="rgba(34,148,95,0.35)" stroke-width="14" stroke-linecap="round"></path>
+          <path id="routePolyline" d="" fill="none" stroke="#176b45" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="route-drawn-line"></path>
+          <path id="routePolylineDots" d="" fill="none" stroke="#8df2a9" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8" class="route-active-flow"></path>
+        </svg>
+
+        <!-- Dynamic markers container -->
+        <div id="navMarkersContainer" class="map-overlay-layer"></div>
+      </div>
+
+      <div class="map-bottom-bar">
+        <div class="room-details-text">
+          <h4 id="navBottomTitle">Destination: Room 5104</h4>
+          <p id="navBottomDesc">Mechanical Engineering Block • First Floor • Class Room</p>
+        </div>
+        <div>
+          <button class="btn secondary" style="padding:6px 12px;font-size:12px" onclick="setMapViewMode(currentMapMode==='satellite'?'floorplan':'satellite')">Switch Map View ↺</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- STUDENT LOGIN & REGISTRATION -->
+<!-- ============================================== -->
+<section id="login" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">🎓 Student Account Portal</span>
+    <span></span>
+  </div>
+  <div class="panel">
+    <div class="tabs"><button id="lt1" class="tab active" onclick="loginMode('login')">Login</button><button id="lt2" class="tab" onclick="loginMode('signup')">New Student Sign Up</button></div>
+    <div id="loginBox">
+      <h2>Student Login</h2>
+      <p class="muted">Sign in with your registered college Email ID or Enrollment Number and password.</p>
+      <div class="formgrid">
+        <div class="field"><label>Email ID or Enrollment Number</label><input id="loginId" autocomplete="off" placeholder="e.g. rahul@student.gecp.ac.in or 250610107021"></div>
+        <div class="field">
+          <label>Password</label>
+          <input id="loginPass" type="password" autocomplete="new-password" placeholder="Your password">
+          <div style="text-align:right;margin-top:6px">
+            <a href="javascript:void(0)" onclick="openForgotPasswordModal('student')" style="color:var(--green);font-size:12.5px;font-weight:700;text-decoration:none">🔑 Forgot Password? Reset via Email OTP</a>
+          </div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn" onclick="studentLogin()">Login</button></div>
+      <div id="loginMsg" class="notice hidden" style="margin-top:12px"></div>
+    </div>
+    <div id="signupBox" class="hidden">
+      <h2>New Student Registration</h2>
+      <p class="muted">Provide your valid email ID and details. Your email ID is unique to your account and used for secure login and instant OTP password resets.</p>
+      <div class="formgrid">
+        <div class="field"><label>Full Name *</label><input id="sName" placeholder="e.g. Rahul Patel"></div>
+        <div class="field"><label>Valid Email ID *</label><input id="sEmail" type="email" placeholder="e.g. rahul.patel@student.gecp.ac.in"></div>
+        <div class="field"><label>Enrollment Number (optional)</label><input id="sEnroll" placeholder="e.g. 250610107021 (leave blank if not yet assigned)"></div>
+        <div class="field"><label>Password *</label><input id="sPass" type="password" placeholder="Create a secure password"></div>
+        <div class="field"><label>Department *</label><select id="sDept"><option value="">Select</option><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+        <div class="field"><label>Semester *</label><select id="sSem"><option value="">Select</option><option value="I">I</option><option value="III">III</option><option value="V">V</option><option value="VII">VII</option></select></div>
+        <div class="field"><label>Batch *</label><select id="sBatch"><option value="">Select department first</option></select></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="signup()">Create Student Account</button></div>
+      <div id="signupMsg" class="notice hidden" style="margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- FACULTY LOGIN & REGISTRATION -->
+<!-- ============================================== -->
+<section id="faculty" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">👨‍🏫 Faculty Portal</span>
+    <span></span>
+  </div>
+  <div id="facultyAuth" class="panel">
+    <div class="tabs"><button id="ft1" class="tab active" onclick="facultyLoginMode('login')">Faculty Login</button><button id="ft2" class="tab" onclick="facultyLoginMode('signup')">Faculty Sign Up</button></div>
+    <div id="facultyLoginBox">
+      <h2>Faculty Login</h2>
+      <p class="muted">Sign in with your faculty code (e.g. <b>SDJ</b>, <b>RHJ</b>, <b>KMG</b>) or registered email and password.</p>
+      <div class="formgrid">
+        <div class="field"><label>Faculty Code or Email *</label><input id="facultyLoginCode" autocomplete="off" placeholder="e.g. SDJ or sdj@gecp.local"></div>
+        <div class="field">
+          <label>Password *</label>
+          <input id="facultyLoginPass" type="password" autocomplete="new-password" placeholder="Enter password">
+          <div style="text-align:right;margin-top:6px">
+            <a href="javascript:void(0)" onclick="openForgotPasswordModal('faculty')" style="color:var(--green);font-size:12.5px;font-weight:700;text-decoration:none">🔑 Forgot Password? Reset via Email OTP</a>
+          </div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn" onclick="facultyLogin()">Login</button></div>
+      <div id="facultyLoginMsg" class="notice hidden" style="margin-top:12px"></div>
+    </div>
+
+    <div id="facultySignupBox" class="hidden">
+      <h2>Faculty Account Registration / Password Setup</h2>
+      <p class="muted">Use the same faculty code that is written in the timetable (for example SDJ, RHJ, KMG, BDP, etc.). You can set or change your password here.</p>
+      <div class="formgrid">
+        <div class="field"><label>Full name *</label><input id="facultyName"></div>
+        <div class="field"><label>Faculty code *</label><input id="facultyCode" placeholder="e.g. SDJ"></div>
+        <div class="field"><label>Department *</label><select id="facultyDept"><option value="">Select</option><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+        <div class="field"><label>Create password *</label><input id="facultyPass" type="password" autocomplete="new-password"></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="signupFaculty()">Create / Activate Faculty Account</button></div>
+      <div id="facultySignupMsg" class="notice hidden" style="margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- FACULTY DASHBOARD WITH SECTION BAR -->
+<!-- ============================================== -->
+<section id="facultyDashboard" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">👨‍🏫 Faculty Dashboard</span>
+    <button class="btn secondary" style="padding:4px 10px;font-size:12px" onclick="facultyLogout()">Logout</button>
+  </div>
+  <div class="panel">
+    <div class="topline">
+      <div><h2 id="facultyTitle">Faculty Dashboard</h2><p id="facultyInfo" class="muted"></p></div>
+      <button class="btn secondary" onclick="facultyLogout()">Logout</button>
+    </div>
+    <!-- Section Bar -->
+    <div class="dashboard-section-bar">
+      <button id="fSecTab_schedule" class="dash-tab active" onclick="switchFacultySection('schedule')">📅 Teaching Schedule</button>
+      <button id="fSecTab_exams" class="dash-tab" onclick="switchFacultySection('exams')">📝 Department Exam Timetable</button>
+      <button id="fSecTab_navigator" class="dash-tab" onclick="switchFacultySection('navigator')">🧭 Campus Navigator</button>
+    </div>
+  </div>
+
+  <div id="fSection_schedule">
+    <div id="facultyLiveStatus" class="live-timetable"></div>
+    <div id="facultySchedule"></div>
+  </div>
+
+  <div id="fSection_exams" class="hidden">
+    <div class="panel">
+      <div class="topline">
+        <div>
+          <h3 style="margin:0">📝 Department Exam Schedule & Room Allocations</h3>
+          <p class="muted" style="margin:4px 0 0">GTU and Mid-Semester exam schedule, exam rooms, and seating blocks for your department.</p>
+        </div>
+        <button class="btn secondary" onclick="loadFacultyExams()">Refresh Exam List</button>
+      </div>
+      <div id="facultyExamsList" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <div id="fSection_navigator" class="hidden">
+    <div class="panel">
+      <h3>🧭 Classroom & Lab Wayfinding</h3>
+      <p class="muted">Locate your designated classrooms, laboratories, and seminar halls across campus.</p>
+      <button class="btn" onclick="showPage('navigation')">Launch Full Campus GPS Navigator ↗</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================== -->
+<!-- STUDENT DASHBOARD WITH SECTION BAR -->
+<!-- ============================================== -->
+<section id="student" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">🎓 Student Workspace</span>
+    <button class="btn secondary" style="padding:4px 10px;font-size:12px" onclick="logout()">Logout</button>
+  </div>
+  <div class="panel">
+    <div class="topline">
+      <div><h2 id="studentTitle">Student Dashboard</h2><p id="studentInfo" class="muted"></p></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn secondary" style="padding:6px 12px;font-size:12.5px" onclick="switchStudentSection('notes'); focusNoteInput();">📝 + New Note</button>
+        <button class="btn secondary" style="padding:6px 12px;font-size:12.5px" onclick="switchStudentSection('submissions'); focusSubmissionInput();">📋 + New Submission</button>
+      </div>
+    </div>
+    <!-- Modern Section Bar -->
+    <div class="dashboard-section-bar">
+      <button id="sSecTab_timetable" class="dash-tab active" onclick="switchStudentSection('timetable')">📅 My Timetable</button>
+      <button id="sSecTab_exams" class="dash-tab" onclick="switchStudentSection('exams')">📝 Exam Timetable</button>
+      <button id="sSecTab_notes" class="dash-tab" onclick="switchStudentSection('notes')">📝 My Notes <span id="sNotesBadge" class="badge" style="margin-left:4px">0</span></button>
+      <button id="sSecTab_submissions" class="dash-tab" onclick="switchStudentSection('submissions')">📋 My Submissions <span id="sSubsBadge" class="badge" style="margin-left:4px">0</span></button>
+      <button id="sSecTab_navigator" class="dash-tab" onclick="switchStudentSection('navigator')">🧭 Campus Navigator</button>
+    </div>
+  </div>
+
+  <!-- Student Section 1: Timetable -->
+  <div id="sSection_timetable">
+    <div id="liveTimetableStatus" class="live-timetable"></div>
+    <div id="studentTimetable"></div>
+  </div>
+
+  <!-- Student Section: Exam Timetable -->
+  <div id="sSection_exams" class="hidden">
+    <div class="panel">
+      <div class="topline">
+        <div>
+          <h3 style="margin:0">📝 GTU & Mid-Sem Exam Schedule</h3>
+          <p class="muted" style="margin:4px 0 0">Personalized exam timetable for your department and semester with direct exam hall navigation.</p>
+        </div>
+        <button class="btn secondary" onclick="loadStudentExams()">Refresh Exam Schedule</button>
+      </div>
+      <div id="studentExamsList" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <!-- Student Section 2: Campus Navigator -->
+  <div id="sSection_navigator" class="hidden">
+
+    <div class="panel">
+      <h3>🧭 Classroom & Campus Wayfinding</h3>
+      <p class="muted">Quickly navigate to any lecture hall, lab, or department building across campus.</p>
+      <button class="btn" onclick="showPage('navigation')">Open Full Campus GPS Navigator ↗</button>
+    </div>
+  </div>
+
+  <!-- Student Section 3: Notes -->
+  <div id="sSection_notes" class="hidden">
+    <div id="notesPage" class="panel private-workspace">
+      <h2>My Private Notes</h2>
+      <p class="muted">Write notes for your classes and attach a photo. Only you can see them, and they are saved securely in your account.</p>
+      <div class="formgrid">
+        <div class="field"><label>Class / Subject *</label><input id="noteSubject" placeholder="e.g. DBMS practical"></div>
+        <div class="field"><label>Note type</label><select id="noteType"><option>Class note</option><option>Practical note</option><option>Lab note</option><option>Study reminder</option></select></div>
+        <div class="field"><label>Photo attachment (optional)</label><input id="notePhoto" type="file" accept="image/*"></div>
+        <div class="field" style="grid-column:1/-1"><label>Write your note *</label><textarea id="noteText" placeholder="Write your private class note here."></textarea></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="saveStudentItem('note')">Save note</button></div>
+      <div id="privateNotes"></div>
+    </div>
+  </div>
+
+  <!-- Student Section 4: Submissions -->
+  <div id="sSection_submissions" class="hidden">
+    <div id="submissionsPage" class="panel private-workspace">
+      <h2>My Submissions</h2>
+      <p class="muted">Save assignment, practical, lab record, and manual deadlines privately.</p>
+      <div class="formgrid">
+        <div class="field"><label>Class / Subject *</label><input id="submissionSubject" placeholder="e.g. DBMS assignment"></div>
+        <div class="field"><label>Submission type</label><select id="submissionType"><option>Assignment</option><option>Practical manual</option><option>Lab record</option><option>Project work</option></select></div>
+        <div class="field"><label>Due date</label><input id="submissionDueDate" type="date"></div>
+        <div class="field"><label>Date submitted</label><input id="submissionDate" type="date"></div>
+        <div class="field"><label>Practical/manual check date</label><input id="submissionCheckDate" type="date"></div>
+        <div class="field"><label>Photo attachment (optional)</label><input id="submissionPhoto" type="file" accept="image/*"></div>
+        <div class="field" style="grid-column:1/-1"><label>Details / reminder *</label><textarea id="submissionText" placeholder="Write details, requirements, or a reminder."></textarea></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="saveStudentItem('submission')">Save submission</button></div>
+      <div id="privateSubmissions"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- COLLEGE PUBLIC TIMETABLE -->
+<!-- ============================================== -->
+<section id="timetable" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">📅 Master College Timetable (2026-27)</span>
+    <span></span>
+  </div>
+  <div class="panel">
+    <div class="topline">
+      <div>
+        <h2>College Timetables & Exam Schedules</h2>
+        <p class="muted">Access weekly class routines, GTU End-Semester exams, and Mid-Sem schedules.</p>
+      </div>
+      <button class="btn secondary" onclick="printTimetable()">Print</button>
+    </div>
+
+    <!-- Toggle between Class Routine and Exam Schedules -->
+    <div class="timetable-view-tabs">
+      <button id="ttViewBtn_class" class="timetable-view-tab active" onclick="switchPublicTimetableView('class')">📅 Weekly Class Timetable</button>
+      <button id="ttViewBtn_exam" class="timetable-view-tab" onclick="switchPublicTimetableView('exam')">📝 GTU & Mid-Sem Exam Schedules</button>
+    </div>
+
+    <!-- View 1: Weekly Class Routine -->
+    <div id="publicClassRoutineView">
+      <div class="filters">
+        <div class="field"><label>Department</label><select id="fDept" onchange="renderPublicTimetable()"><option value="ALL">All Departments</option><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+        <div class="field"><label>Semester</label><select id="fSem" onchange="renderPublicTimetable()"><option value="ALL">All</option><option>I</option><option>III</option><option>V</option><option>VII</option></select></div>
+        <div class="field"><label>Batch</label><select id="fBatch" onchange="renderPublicTimetable()"><option value="ALL">All Batches</option></select></div>
+        <div class="field"><label>Day</label><select id="fDay" onchange="renderPublicTimetable()"><option value="ALL">All Days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select></div>
+        <div class="field"><label>Search</label><input id="fSearch" oninput="renderPublicTimetable()" placeholder="Subject / faculty / room"></div>
+      </div>
+      <div id="publicTT"></div>
+    </div>
+
+    <!-- View 2: Exam Timetables -->
+    <div id="publicExamScheduleView" class="hidden">
+      <div class="filters">
+        <div class="field"><label>Department</label><select id="fExamDept" onchange="renderPublicExams()"><option value="ALL">All Departments</option><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+        <div class="field"><label>Semester</label><select id="fExamSem" onchange="renderPublicExams()"><option value="ALL">All</option><option>I</option><option>III</option><option>V</option><option>VII</option></select></div>
+        <div class="field"><label>Exam Type</label><select id="fExamType" onchange="renderPublicExams()"><option value="ALL">All Exam Types</option><option>GTU End-Sem Exam</option><option>Mid-Sem Exam</option><option>Remedial Exam</option><option>Viva / Practical</option></select></div>
+        <div class="field"><label>Search</label><input id="fExamSearch" oninput="renderPublicExams()" placeholder="Subject / code / room"></div>
+      </div>
+      <div id="publicExamsContainer"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- ADMIN PANEL WITH SECTION BAR & EXCLUSIVE DATABASE -->
+<!-- ============================================== -->
+<section id="admin" class="page hidden">
+  <div class="page-back-bar">
+    <button class="btn-page-back" onclick="goBack()">⬅️ Back to Home</button>
+    <span class="back-title">🛡️ Admin Security Portal</span>
+    <span></span>
+  </div>
+  <div id="adminLogin" class="panel">
+    <h2>Department Admin Login</h2><p class="muted">Choose your department. Each admin can only manage that department’s timetable, students, and system data.</p>
+    <div class="formgrid">
+      <div class="field"><label>Department</label><select id="aDept"><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+      <div class="field"><label>Password</label><input id="aPass" type="password" autocomplete="new-password" placeholder="Enter admin password"></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="adminLogin()">Admin Login</button></div>
+    <div id="adminMsg" class="notice hidden" style="margin-top:12px"></div>
+  </div>
+
+  <div id="adminPanel" class="hidden">
+    <div class="panel">
+      <div class="topline">
+        <div>
+          <h2 id="adminTitle">Department Admin Dashboard</h2>
+          <p class="muted">Manage department timetable, students, and inspect full SQLite database.</p>
+        </div>
+        <button class="btn secondary" onclick="adminLogout()">Logout</button>
+      </div>
+
+      <!-- Admin Section Bar -->
+      <div class="dashboard-section-bar">
+        <button id="aSecTab_timetable" class="dash-tab active" onclick="switchAdminSection('timetable')">📅 Department Timetable</button>
+        <button id="aSecTab_exams" class="dash-tab" onclick="switchAdminSection('exams')">📝 Exam Timetable</button>
+        <button id="aSecTab_students" class="dash-tab" onclick="switchAdminSection('students')">👥 Registered Students</button>
+        <button id="aSecTab_database" class="dash-tab" onclick="switchAdminSection('database')">🗄️ Database Explorer (Admin Only)</button>
+      </div>
+    </div>
+
+    <!-- Admin Section 1: Timetable Management -->
+    <div id="aSection_timetable">
+      <div id="adminManage" class="panel">
+        <h3>Manage your department timetable</h3>
+        <p class="muted">Your department is selected automatically. Choose a semester or day only when you need to find an entry quickly.</p>
+        <div class="formgrid admin-quick-filters">
+          <div class="field"><label>Semester</label><select id="adminSemFilter" onchange="renderAdminTable()"><option value="ALL">All semesters</option><option value="I">Semester I</option><option value="III">Semester III</option><option value="V">Semester V</option><option value="VII">Semester VII</option></select></div>
+          <div class="field"><label>Day</label><select id="adminDayFilter" onchange="renderAdminTable()"><option value="ALL">All days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select></div>
+        </div>
+        <div class="actions" style="margin-top:0"><button class="btn" onclick="openEntry()">+ Add class, lab or activity</button><button class="btn secondary" onclick="renderAdminTable()">Refresh list</button></div>
+        <div id="adminTT" style="margin-top:15px"></div>
+      </div>
+    </div>
+
+    <!-- Admin Section: Exam Timetable Management -->
+    <div id="aSection_exams" class="hidden">
+      <div class="panel">
+        <div class="topline">
+          <div>
+            <h3 style="margin:0">📝 Manage Department Exam Timetable</h3>
+            <p class="muted" style="margin:4px 0 0">Add, edit, and organize GTU End-Semester, Mid-Sem, and Remedial exams for your department.</p>
+          </div>
+          <button class="btn" onclick="openExamEntry()">+ Add Exam Schedule</button>
+        </div>
+        <div class="formgrid admin-quick-filters" style="margin-top:16px">
+          <div class="field"><label>Semester</label><select id="adminExamSemFilter" onchange="renderAdminExams()"><option value="ALL">All semesters</option><option value="I">Semester I</option><option value="III">Semester III</option><option value="V">Semester V</option><option value="VII">Semester VII</option></select></div>
+          <div class="field"><label>Exam Type</label><select id="adminExamTypeFilter" onchange="renderAdminExams()"><option value="ALL">All Exam Types</option><option>GTU End-Sem Exam</option><option>Mid-Sem Exam</option><option>Remedial Exam</option><option>Viva / Practical</option></select></div>
+        </div>
+        <div id="adminExamsTableContainer" style="margin-top:15px"></div>
+      </div>
+    </div>
+
+
+    <!-- Admin Section 2: Registered Students Directory -->
+    <div id="aSection_students" class="hidden">
+      <div id="adminStudents" class="panel admin-student-section">
+        <div class="topline">
+          <div>
+            <h3 id="adminDeptStudentsTitle" style="margin:0">👥 Department Registered Students Directory</h3>
+            <p class="muted" style="margin:4px 0 0">View registered students for your department. Edit mistaken registration details or remove student accounts.</p>
+          </div>
+          <div>
+            <span class="admin-student-badge" id="adminStudentDeptBadge">Computer Engineering</span>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 16px 0 14px;">
+          <div class="card" style="padding:14px">
+            <span class="muted" style="font-size:12px;font-weight:700">TOTAL DEPARTMENT STUDENTS</span>
+            <div id="studentTotal" style="font-size:28px;font-weight:900;color:var(--green);margin-top:4px">0</div>
+          </div>
+        </div>
+
+        <div class="db-table-filter" style="margin-bottom:12px">
+          <input id="adminStudentSearch" type="text" placeholder="🔍 Search student by name, enrollment no, or mobile..." oninput="filterAdminStudents()">
+        </div>
+
+        <div id="studentTable" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- Admin Section 3: SQLite Database Explorer (STRICTLY ADMIN EXCLUSIVE) -->
+    <div id="aSection_database" class="hidden">
+      <div class="panel">
+        <div class="topline">
+          <div>
+            <h3 style="margin:0">🗄️ SQLite Database Explorer (database.db)</h3>
+            <p class="muted small" style="margin:4px 0 0">Live real-time view of SQLite tables, counts, and stored records.</p>
+          </div>
+          <button class="btn secondary" onclick="loadDatabaseViewer()">🔄 Refresh Data</button>
+        </div>
+
+        <div class="db-stats-grid" id="dbStatsContainer">
+          <div class="db-stat-card"><span>Registered Students</span><h3 id="dbStatStudents">0</h3></div>
+          <div class="db-stat-card"><span>Faculty Accounts</span><h3 id="dbStatFaculty">0</h3></div>
+          <div class="db-stat-card"><span>Timetable Entries</span><h3 id="dbStatTimetable">0</h3></div>
+          <div class="db-stat-card"><span>Student Notes</span><h3 id="dbStatNotes">0</h3></div>
+          <div class="db-stat-card"><span>Submissions</span><h3 id="dbStatSubmissions">0</h3></div>
+          <div class="db-stat-card"><span>Database Size</span><h3 id="dbStatSize">0 KB</h3></div>
+        </div>
+
+        <div class="tabs">
+          <button id="dbtab_students" class="tab active" onclick="switchDbTable('students')">Students (students)</button>
+          <button id="dbtab_faculty" class="tab" onclick="switchDbTable('faculty')">Faculty (faculty)</button>
+          <button id="dbtab_timetable" class="tab" onclick="switchDbTable('timetable')">Timetable (timetable)</button>
+          <button id="dbtab_notes" class="tab" onclick="switchDbTable('notes')">Notes (notes)</button>
+          <button id="dbtab_submissions" class="tab" onclick="switchDbTable('submissions')">Submissions (submissions)</button>
+        </div>
+
+        <div class="db-table-filter">
+          <input id="dbSearchInput" placeholder="🔍 Search any value in current table..." oninput="filterDbTableRows()">
+          <span id="dbRowCount" class="badge">Loading records...</span>
+        </div>
+
+        <div id="dbTableContainer" class="tablewrap" style="max-height:500px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer>Government Engineering College, Palanpur • CampusCompass GECP • 2026–27 ODD SEM</footer>
+
+<!-- ============================================== -->
+<!-- MODALS -->
+<!-- ============================================== -->
+
+<!-- Add / Edit Timetable Entry Modal -->
+<div id="entryModal" class="modal hidden">
+  <div class="modalbox">
+    <div class="topline"><h2 id="entryTitle">Add Timetable Entry</h2><button class="btn danger" onclick="closeEntry()">Close</button></div>
+    <div class="formgrid">
+      <div class="field"><label>Department *</label><select id="eDept" disabled><option>Computer Engineering</option><option>Electrical Engineering</option><option>Civil Engineering</option><option>Mechanical Engineering</option></select></div>
+      <div class="field"><label>Semester *</label><select id="eSem"><option>I</option><option>III</option><option>V</option><option>VII</option></select></div>
+      <div class="field"><label>Batch</label><input id="eBatch" placeholder="CP1 / E1 / C2 / M3 / ALL"></div>
+      <div class="field"><label>Day *</label><select id="eDay"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select></div>
+      <div class="field"><label>Time *</label><select id="eTime"><option>10:30 AM – 11:30 AM</option><option>11:30 AM – 12:30 PM</option><option>01:00 PM – 02:00 PM</option><option>02:00 PM – 03:00 PM</option><option>03:10 PM – 05:10 PM</option></select></div>
+      <div class="field"><label>Subject / Details *</label><input id="eSubject" placeholder="e.g. DBMS (RS)"></div>
+      <div class="field"><label>Room</label><input id="eRoom" placeholder="e.g. 8113"></div>
+      <div class="field"><label>Faculty</label><input id="eFaculty" placeholder="e.g. RS"></div>
+      <div class="field" style="grid-column:1/-1"><label>Extra note</label><textarea id="eNote" placeholder="Practical continuation, library, etc."></textarea></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="saveEntry()">Save Entry</button></div>
+  </div>
+</div>
+
+<!-- Edit Student Registration Modal -->
+<div id="editStudentModal" class="modal hidden" onclick="if(event.target===this)closeEditStudentModal()">
+  <div class="modalbox" style="max-width:540px">
+    <div class="topline">
+      <div>
+        <h3 style="margin:0">✏️ Edit Student Registration</h3>
+        <p class="muted small" style="margin:3px 0 0">Correct any mistaken student details.</p>
+      </div>
+      <button class="btn danger" onclick="closeEditStudentModal()">✕</button>
+    </div>
+    <form id="editStudentForm" onsubmit="event.preventDefault(); saveStudentEdit();" style="margin-top:14px">
+      <input type="hidden" id="editStudentId">
+      <div class="formgrid">
+        <div class="field" style="grid-column:1/-1">
+          <label>Student Full Name *</label>
+          <input id="editStudentName" required placeholder="e.g. Ramesh Patel">
+        </div>
+        <div class="field">
+          <label>Enrollment Number *</label>
+          <input id="editStudentEnroll" required placeholder="e.g. 230610107001">
+        </div>
+        <div class="field">
+          <label>Mobile Number (10 digits) *</label>
+          <input id="editStudentMobile" required placeholder="e.g. 9876543210">
+        </div>
+        <div class="field">
+          <label>Semester *</label>
+          <select id="editStudentSem">
+            <option value="I">Semester I</option>
+            <option value="III">Semester III</option>
+            <option value="V">Semester V</option>
+            <option value="VII">Semester VII</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Batch *</label>
+          <input id="editStudentBatch" required placeholder="e.g. CP1, E1, M2, C3">
+        </div>
+      </div>
+      <div id="editStudentMsg" class="notice hidden" style="margin-top:12px"></div>
+      <div class="actions" style="margin-top:18px">
+        <button type="submit" class="btn">💾 Save Changes</button>
+        <button type="button" class="btn secondary" onclick="closeEditStudentModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Download & Share App Modal -->
+<div id="shareAppModal" class="modal hidden" onclick="if(event.target===this)closeShareModal()">
+  <div class="modalbox share-modalbox">
+    <div class="topline">
+      <div>
+        <h3 style="margin:0">📲 CampusCompass GECP</h3>
+        <p class="muted small" style="margin:3px 0 0">Download or share with classmates & faculty</p>
+      </div>
+      <button class="btn danger" onclick="closeShareModal()">✕</button>
+    </div>
+
+    <div class="share-options-grid">
+      <!-- Option 1: Mobile Phone App (Android & iPhone) -->
+      <div class="share-card" style="border:2px solid var(--green);background:#f6fbf8">
+        <div>
+          <span style="font-size:32px">📱</span>
+          <h4 style="color:var(--green)">Mobile Phone App (Android / iPhone)</h4>
+          <p>Install directly on your phone with 1-tap! Works offline with timetable & room GPS navigation.</p>
+        </div>
+        <button class="btn" style="width:100%;padding:10px;font-weight:800" onclick="closeShareModal(); openPhoneInstallModal();">
+          📲 Install on This Phone (1-Click)
+        </button>
+      </div>
+
+      <!-- Option 2: Standalone Windows App (.EXE) -->
+      <div class="share-card">
+        <div>
+          <span style="font-size:32px">💻</span>
+          <h4>Windows Desktop App (.EXE)</h4>
+          <p>Standalone desktop application with <b>CampusCompass.exe</b> for laptop/PC (No Python required).</p>
+        </div>
+        <a href="/api/download/app-exe" class="btn secondary" style="width:100%;text-decoration:none;display:inline-block;padding:10px" download>
+          ⬇️ Download Windows (.EXE)
+        </a>
+      </div>
+
+      <!-- Option 3: Full Portable App (.ZIP) -->
+      <div class="share-card">
+        <div>
+          <span style="font-size:32px">📦</span>
+          <h4>Portable Package (.ZIP)</h4>
+          <p>Full project package with SQLite database, 8 building plans, and Python launcher scripts.</p>
+        </div>
+        <a href="/api/download/app-zip" class="btn secondary" style="width:100%;text-decoration:none;display:inline-block;padding:10px" download>
+          ⬇️ Download ZIP
+        </a>
+      </div>
+
+      <!-- Option 2: Live Network Sharing -->
+      <div class="share-card">
+        <div>
+          <span style="font-size:32px">📡</span>
+          <h4>Share on Campus Wi-Fi</h4>
+          <p>Scan with phone camera or open the link on any device.</p>
+        </div>
+        <div class="qr-wrapper" id="shareQrBox">
+          <svg width="110" height="110" viewBox="0 0 110 110" id="shareQrSvg">
+            <rect width="110" height="110" fill="#ffffff" />
+            <rect x="10" y="10" width="28" height="28" fill="#176b45" rx="4"/>
+            <rect x="14" y="14" width="20" height="20" fill="#ffffff" rx="2"/>
+            <rect x="18" y="18" width="12" height="12" fill="#176b45" rx="2"/>
+            <rect x="72" y="10" width="28" height="28" fill="#176b45" rx="4"/>
+            <rect x="76" y="14" width="20" height="20" fill="#ffffff" rx="2"/>
+            <rect x="80" y="18" width="12" height="12" fill="#176b45" rx="2"/>
+            <rect x="10" y="72" width="28" height="28" fill="#176b45" rx="4"/>
+            <rect x="14" y="76" width="20" height="20" fill="#ffffff" rx="2"/>
+            <rect x="18" y="80" width="12" height="12" fill="#176b45" rx="2"/>
+            <circle cx="55" cy="55" r="7" fill="#176b45"/>
+            <rect x="46" y="20" width="6" height="16" fill="#176b45"/>
+            <rect x="58" y="20" width="6" height="8" fill="#176b45"/>
+            <rect x="46" y="76" width="18" height="6" fill="#176b45"/>
+            <rect x="76" y="52" width="8" height="14" fill="#176b45"/>
+            <rect x="76" y="76" width="18" height="18" fill="#176b45" rx="3"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:14px;background:#f8fbf9;border-radius:12px;margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">🔗 Direct Wi-Fi Share Link:</label>
+      <div class="share-link-box">
+        <input id="shareUrlInput" readonly value="http://10.16.108.229:5000">
+        <button class="btn secondary" onclick="copyShareUrl()">📋 Copy Link</button>
+      </div>
+      <div id="copySuccessMsg" class="notice hidden" style="margin-top:8px;padding:6px 10px;font-size:12px">Link copied to clipboard! Share it with your friends.</div>
+    </div>
+
+    <div class="actions" style="justify-content:space-between">
+      <button class="btn secondary" onclick="installApp()">📲 Install as Device App (PWA)</button>
+      <button class="btn" onclick="closeShareModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3D Wayfinding Modal -->
+<div id="mapModal" class="modal hidden" onclick="if(event.target===this)closeMapModal()">
+  <div class="modalbox map-modalbox">
+    <div class="topline">
+      <div>
+        <h2 id="mapModalTitle" style="margin:0">3D Wayfinding Map</h2>
+        <p id="mapModalSubtitle" class="muted small" style="margin:4px 0 0">Government Engineering College, Palanpur</p>
+      </div>
+      <button class="btn danger" onclick="closeMapModal()">Close ✕</button>
+    </div>
+    <div class="modal-map-view" style="margin-top:14px">
+      <img id="mapModalImg" src="" alt="Wayfinding Map">
+    </div>
+    <div class="actions" style="margin-top:14px;justify-content:space-between;align-items:center">
+      <button id="btnModalNavigate" class="btn" onclick="navigateFromModal()">🧭 Navigate with Live GPS</button>
+      <button class="btn secondary" onclick="closeMapModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- FORGOT PASSWORD / EMAIL OTP MODAL -->
+<!-- ============================================== -->
+<div id="forgotPasswordModal" class="modal hidden" onclick="if(event.target===this)closeForgotPasswordModal()">
+  <div class="modalbox" style="max-width:480px">
+    <div class="topline">
+      <div>
+        <h3 style="margin:0">🔑 Reset Account Password</h3>
+        <p class="muted small" style="margin:4px 0 0">Verify your identity with a secure 6-digit Email OTP</p>
+      </div>
+      <button class="btn danger" onclick="closeForgotPasswordModal()">✕</button>
+    </div>
+
+    <!-- Step 1: Enter Email -->
+    <div id="forgotStep1" style="margin-top:16px">
+      <div class="formgrid">
+        <div class="field">
+          <label>Account Type *</label>
+          <select id="forgotUserType">
+            <option value="student">🎓 Student Account</option>
+            <option value="faculty">👨‍🏫 Faculty Account</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Registered Email Address *</label>
+          <input id="forgotEmail" type="email" placeholder="e.g. yourname@student.gecp.ac.in">
+        </div>
+      </div>
+      <div id="forgotMsg1" class="notice hidden" style="margin-top:10px"></div>
+      <div class="actions" style="margin-top:16px;justify-content:space-between">
+        <button class="btn secondary" onclick="closeForgotPasswordModal()">Cancel</button>
+        <button class="btn" onclick="sendPasswordResetOtp()">Send 6-Digit OTP →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Enter OTP & New Password -->
+    <div id="forgotStep2" class="hidden" style="margin-top:16px">
+      <div id="forgotOtpDemoAlert" class="otp-demo-alert hidden"></div>
+      <p class="small muted" style="text-align:center;margin:0 0 10px">Enter the 6-digit verification code sent to <b id="forgotTargetEmailDisplay"></b>:</p>
+      
+      <div style="margin-bottom:16px">
+        <input id="forgotOtp" class="otp-input-field" maxlength="6" placeholder="••••••" autocomplete="one-time-code">
+      </div>
+
+      <div class="formgrid">
+        <div class="field">
+          <label>New Password *</label>
+          <input id="forgotNewPass" type="password" placeholder="Min 4 characters">
+        </div>
+        <div class="field">
+          <label>Confirm New Password *</label>
+          <input id="forgotConfirmPass" type="password" placeholder="Repeat new password">
+        </div>
+      </div>
+      <div id="forgotMsg2" class="notice hidden" style="margin-top:10px"></div>
+      <div class="actions" style="margin-top:16px;justify-content:space-between">
+        <button class="btn secondary" onclick="backToForgotStep1()">← Back / Resend</button>
+        <button class="btn" onclick="submitResetPassword()">Verify & Reset Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- ADMIN EXAM TIMETABLE ADD/EDIT MODAL -->
+<!-- ============================================== -->
+<div id="examEntryModal" class="modal hidden" onclick="if(event.target===this)closeExamEntryModal()">
+  <div class="modalbox" style="max-width:580px">
+    <div class="topline">
+      <div>
+        <h3 id="examModalTitle" style="margin:0">Add Exam Schedule</h3>
+        <p class="muted small" style="margin:4px 0 0">Government Engineering College, Palanpur</p>
+      </div>
+      <button class="btn danger" onclick="closeExamEntryModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="examEntryId">
+    <div class="formgrid" style="margin-top:16px">
+      <div class="field">
+        <label>Department *</label>
+        <select id="examEntryDept">
+          <option>Computer Engineering</option>
+          <option>Electrical Engineering</option>
+          <option>Civil Engineering</option>
+          <option>Mechanical Engineering</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Semester *</label>
+        <select id="examEntrySem">
+          <option value="I">Semester I</option>
+          <option value="III">Semester III</option>
+          <option value="V">Semester V</option>
+          <option value="VII">Semester VII</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Exam Type *</label>
+        <select id="examEntryType">
+          <option>GTU End-Sem Exam</option>
+          <option>Mid-Sem Exam</option>
+          <option>Remedial Exam</option>
+          <option>Viva / Practical</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Subject Code (e.g. 3150703)</label>
+        <input id="examEntrySubjectCode" placeholder="e.g. 3130702">
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Subject Name *</label>
+        <input id="examEntrySubjectName" placeholder="e.g. Data Structures & Algorithms">
+      </div>
+      <div class="field">
+        <label>Exam Date *</label>
+        <input id="examEntryDate" type="date">
+      </div>
+      <div class="field">
+        <label>Exam Time *</label>
+        <input id="examEntryTime" placeholder="e.g. 10:30 AM - 01:00 PM">
+      </div>
+      <div class="field">
+        <label>Room / Hall * (e.g. 8104, 5104)</label>
+        <input id="examEntryRoom" placeholder="e.g. 8104">
+      </div>
+      <div class="field">
+        <label>Block / Seating</label>
+        <input id="examEntryBlock" placeholder="e.g. Block CP-A (Roll 01-30)">
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Notes / Instructions</label>
+        <textarea id="examEntryNotes" placeholder="e.g. Bring GTU Hall Ticket & College ID Card"></textarea>
+      </div>
+    </div>
+    <div id="examEntryMsg" class="notice hidden" style="margin-top:10px"></div>
+    <div class="actions" style="margin-top:16px;justify-content:flex-end">
+      <button class="btn secondary" onclick="closeExamEntryModal()">Cancel</button>
+      <button class="btn" onclick="saveExamEntry()">Save Exam Schedule</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+
+<!-- ============================================== -->
+<!-- MOBILE PHONE APP INSTALLATION MODAL -->
+<!-- ============================================== -->
+<div id="phoneInstallModal" class="modal hidden" onclick="if(event.target===this)closePhoneInstallModal()">
+  <div class="modalbox" style="max-width:540px">
+    <div class="topline">
+      <div>
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px">📱 Install App on Mobile Phone</h3>
+        <p class="muted small" style="margin:4px 0 0">Government Engineering College, Palanpur (GECP)</p>
+      </div>
+      <button class="btn danger" onclick="closePhoneInstallModal()">✕</button>
+    </div>
+
+    <!-- 1-Tap Auto Install Button -->
+    <div style="background:#eaf6ee;border:2px solid #a3cfb8;border-radius:14px;padding:16px;margin:16px 0;text-align:center">
+      <div style="font-size:36px;margin-bottom:6px">📲</div>
+      <h4 style="margin:0 0 6px;color:#0d4a2e">1-Tap Direct Install</h4>
+      <p class="small muted" style="margin:0 0 12px">If your browser supports automatic install, tap below to install immediately:</p>
+      <button id="btnPromptInstallPhone" class="btn" style="padding:10px 24px;font-size:15px;font-weight:800;width:100%" onclick="triggerPhoneInstall()">
+        📲 Install CampusCompass App
+      </button>
+      <div id="phoneInstallSuccessNotice" class="notice hidden" style="margin-top:10px">App installation launched! Check your home screen.</div>
+    </div>
+
+    <h4 style="margin:16px 0 8px">Step-by-Step Mobile Instructions:</h4>
+    <div class="phone-modal-guide">
+      <!-- Android Guide -->
+      <div class="phone-guide-box active">
+        <h4>🤖 Android Phone (Chrome)</h4>
+        <ol class="phone-steps-list">
+          <li>Chrome ke top-right corner me <b>3 Dots (⋮)</b> par tap karein.</li>
+          <li>Menu me <b>"Install App"</b> ya <b>"Add to Home screen"</b> chunein.</li>
+          <li><b>"Install"</b> dabayein — App phone screen par install ho jayegi!</li>
+        </ol>
+      </div>
+
+      <!-- iPhone Guide -->
+      <div class="phone-guide-box">
+        <h4>🍎 iPhone / iPad (Safari)</h4>
+        <ol class="phone-steps-list">
+          <li>Safari me sabse niche <b>Share button (⎙ / ⎋)</b> tap karein.</li>
+          <li>Scroll karke <b>"Add to Home Screen" (+)</b> par tap karein.</li>
+          <li>Top-right me <b>"Add"</b> dabayein — App screen par add ho jayegi!</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Direct Share Link -->
+    <div style="background:#f8fbf9;border:1px solid #d8eee1;border-radius:12px;padding:12px;margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:4px">🔗 Mobile Wi-Fi Share Link:</label>
+      <div class="share-link-box">
+        <input id="phoneShareUrlInput" readonly value="http://10.16.108.229:5000">
+        <button class="btn secondary" onclick="copyPhoneShareUrl()">📋 Copy</button>
+      </div>
+    </div>
+
+    <div class="actions" style="justify-content:flex-end">
+      <button class="btn" onclick="closePhoneInstallModal()">Close</button>
+    </div>
+  </div>
+<!-- Mobile Sticky PWA Install Bar -->
+<div id="mobilePwaInstallBar" class="mobile-pwa-bottom-bar hidden">
+  <div class="mobile-pwa-bar-info">
+    <img src="icon-192.png" class="mobile-pwa-bar-icon" alt="CampusCompass Icon">
+    <div>
+      <div class="mobile-pwa-bar-title">CampusCompass GECP</div>
+      <div class="mobile-pwa-bar-subtitle">Install as Mobile App (Offline GPS)</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <button id="pwaBottomBarInstallBtn" class="mobile-pwa-install-btn" onclick="triggerPhoneInstall()">📲 Install App</button>
+    <button class="mobile-pwa-dismiss-btn" onclick="dismissMobilePwaBar()" title="Dismiss">✕</button>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+build/
+dist/
+*.pyc
+__pycache__/
+*.bak
+*.log
+cert.pem
+key.pem
